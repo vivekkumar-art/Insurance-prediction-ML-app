@@ -1,6 +1,4 @@
-scikit-learn
+scikit-learn>=1.0.0
 pandas
 numpy
-matplotlib
-seaborn
 streamlit
