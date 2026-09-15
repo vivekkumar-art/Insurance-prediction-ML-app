@@ -1,4 +1,3 @@
-```python
 import pandas as pd
 import numpy as np
 import seaborn as sns
@@ -198,4 +197,3 @@ if st.button("Click to Predict"):
         f"Probability of buying insurance: "
         f"{probability[1] * 100:.2f}%"
     )
-```
