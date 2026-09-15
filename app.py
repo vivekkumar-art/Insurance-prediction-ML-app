@@ -1,80 +1,201 @@
+```python
 import pandas as pd
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 import os
+import time
+
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import classification_report, confusion_matrix
-from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
+
 import streamlit as st
-#this is for web based application project
 
 
+# ============================================================
+# WEB PAGE CODE
+# ============================================================
 
-#Web page Code 
-st.tittle("HEALTH INSURENCE PREDICTION")
-img_url="https://imgs.search.brave.com/TFjx_njIOx9kqjKDS6hW0MHtdM52dYbdvYuqHBihhwk/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly90aHVt/YnMuZHJlYW1zdGlt/ZS5jb20vYi9oZWFs/dGgtaW5zdXJhbmNl/LWJ1c2luZXNzbWFu/LWRyYXdpbmctbGFu/ZGluZy1wYWdlLXdo/aXRlLWJhY2tncm91/bmQtNzE3ODQ0NTYu/anBn"
+st.title("HEALTH INSURANCE PREDICTION")
+
+
+# Image URL
+img_url = "https://imgs.search.brave.com/TFjx_njIOx9kqjKDS6hW0MHtdM52dYbdvYuqHBihhwk/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly90aHVt/YnMuZHJlYW1zdGlt/ZS5jb20vYi9oZWFs/dGgtaW5zdXJhbmNl/LWJ1c2luZXNzbWFu/LWRyYXdpbmctbGFu/ZGluZy1wYWdlLXdo/aXRlLWJhY2tncm91/bmQtNzE3ODQ0NTYu/anBn"
+
 st.image(img_url)
 
-#Load data and ML Model Part
-url="https://raw.githubusercontent.com/ankitmisk/UIT-data/refs/heads/main/Insurance.csv"
-df=pd.read_csv(url)
-df.sample()
 
-#Step 3: EDA: Exporatory data analysis
-df.head()
-df.drop("Customer_ID",axis=1,inplace=True)
+# ============================================================
+# LOAD DATA
+# ============================================================
 
-df["Previous_Insurance"]=df["Previous_Insurance"].map({"Yes":1,"No":0})
-df["Insurance_Bought"]=df["Insurance_Bought"].map({"Yes":1,"No":0})
+url = "https://raw.githubusercontent.com/ankitmisk/UIT-data/refs/heads/main/Insurance.csv"
 
-#step 4: Divide into features and traget
-X=df.iloc[:,:-1]
-y=df.iloc[:,-1]
-
-#Step 5: Divide data into Training and testinf part
-from sklearn.model_selection import train_test_split
-X_train,X_test,y_train,y_test=train_test_split(X,y,random_state=42,test_size=0.3)  #test_size=0.3 means 30 % data
+df = pd.read_csv(url)
 
 
-#Step 6 :Train model
-model=LogisticRegression()
-model.fit(X_train,y_train)
+# ============================================================
+# EDA
+# ============================================================
 
-#show data sample
+st.subheader("Dataset Preview")
+
 st.write(df.head())
-#Create bar for user input form
-st.sidebar.tittle("Fill Customer Details")
+
+
+# Remove Customer_ID
+if "Customer_ID" in df.columns:
+    df.drop("Customer_ID", axis=1, inplace=True)
+
+
+# Convert Yes/No values to 1/0
+if "Previous_Insurance" in df.columns:
+    df["Previous_Insurance"] = df["Previous_Insurance"].map({
+        "Yes": 1,
+        "No": 0
+    })
+
+
+if "Insurance_Bought" in df.columns:
+    df["Insurance_Bought"] = df["Insurance_Bought"].map({
+        "Yes": 1,
+        "No": 0
+    })
+
+
+# ============================================================
+# DIVIDE DATA INTO FEATURES AND TARGET
+# ============================================================
+
+X = df.iloc[:, :-1]
+y = df.iloc[:, -1]
+
+
+# ============================================================
+# TRAIN / TEST SPLIT
+# ============================================================
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    random_state=42,
+    test_size=0.3
+)
+
+
+# ============================================================
+# TRAIN MODEL
+# ============================================================
+
+model = LogisticRegression(max_iter=1000)
+
+model.fit(X_train, y_train)
+
+
+# ============================================================
+# MODEL ACCURACY
+# ============================================================
+
+y_pred = model.predict(X_test)
+
+accuracy = accuracy_score(y_test, y_pred)
+
+st.subheader("Model Accuracy")
+st.write(f"Accuracy: {accuracy * 100:.2f}%")
+
+
+# ============================================================
+# SIDEBAR USER INPUT
+# ============================================================
+
+st.sidebar.title("Fill Customer Details")
+
 st.sidebar.image(img_url)
 
-#to get user input
-all_ans=[]
-for index,col_name in enumerate(X.columns):
-  min_v = X[col_name].min()
-  max_v=X[col_name].max()
-  if col_name!="Previous_Insurance":
-    value= st.slidebar.slider(f"Select value for {col_name}",
-                              min_value=min_v,
-                              max_value=max_v)
-else:
-  value = st.slidebar.number_input(f"Select values for {col_name}:")
 
-all_ans.append(value)
+# List to store user answers
+all_ans = []
 
-ud ={j:all_ans[i] for i.j in enumerate(X.columns)}
-user_df = pd.DataFrame(ud,index=[1])
+
+for col_name in X.columns:
+
+    min_v = float(X[col_name].min())
+    max_v = float(X[col_name].max())
+
+    # Previous Insurance is binary
+    if col_name == "Previous_Insurance":
+
+        value = st.sidebar.number_input(
+            f"Select value for {col_name}",
+            min_value=int(min_v),
+            max_value=int(max_v),
+            value=int(min_v),
+            step=1
+        )
+
+    else:
+
+        value = st.sidebar.slider(
+            f"Select value for {col_name}",
+            min_value=min_v,
+            max_value=max_v,
+            value=min_v
+        )
+
+    all_ans.append(value)
+
+
+# ============================================================
+# DISPLAY USER INPUT
+# ============================================================
+
+user_data = {
+    col_name: all_ans[i]
+    for i, col_name in enumerate(X.columns)
+}
+
+user_df = pd.DataFrame(user_data, index=[0])
+
+st.subheader("Customer Details")
+
 st.write(user_df)
 
-#=========================================Precdtion================================================================
-if st.button("Click to predict:"):
-  with st.spinner("Predicting..")
-  import time
-  time.sleep(2)
-final_ans=model.predict([all_ans])[0]
-if final_ans==0:
-  st.info("❎Customer will not buy the insurance❎")
-else:
-  st.success("✅Customer will buy the insurance✅")
 
+# ============================================================
+# PREDICTION
+# ============================================================
 
+if st.button("Click to Predict"):
 
+    with st.spinner("Predicting..."):
+
+        time.sleep(2)
+
+        # Convert user input into DataFrame
+        prediction = model.predict(user_df)[0]
+
+        # Prediction probability
+        probability = model.predict_proba(user_df)[0]
+
+    if prediction == 0:
+
+        st.info("❎ Customer will NOT buy the insurance ❎")
+
+    else:
+
+        st.success("✅ Customer WILL buy the insurance ✅")
+
+    # Show probability
+    st.subheader("Prediction Probability")
+
+    st.write(
+        f"Probability of NOT buying insurance: "
+        f"{probability[0] * 100:.2f}%"
+    )
+
+    st.write(
+        f"Probability of buying insurance: "
+        f"{probability[1] * 100:.2f}%"
+    )
+```
