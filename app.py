@@ -1,7 +1,5 @@
 import pandas as pd
 import numpy as np
-import seaborn as sns
-import matplotlib.pyplot as plt
 import os
 import time
 
@@ -20,7 +18,7 @@ st.title("HEALTH INSURANCE PREDICTION")
 
 
 # Image URL
-img_url = "https://imgs.search.brave.com/TFjx_njIOx9kqjKDS6hW0MHtdM52dYbdvYuqHBihhwk/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly90aHVt/YnMuZHJlYW1zdGlt/ZS5jb20vYi9oZWFs/dGgtaW5zdXJhbmNl/LWJ1c2luZXNzbWFu/LWRyYXdpbmctbGFu/ZGluZy1wYWdlLXdo/aXRlLWJhY2tncm91/bmQtNzE3ODQ0NTYu/anBn"
+img_url = "https://imgs.search.brave.com/TFjx_njIOx9kqjKDS6hW0MHtdM52dYbdvYuqHBihhwk/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly90aHVt/YnMuZHJlYW1zdGlt/ZS5jb20vYi9oZWFs/dGgtaW5zdXJhbmNl/LWJ1c2luZXNzbWFu/LWRy[...]"
 
 st.image(img_url)
 
